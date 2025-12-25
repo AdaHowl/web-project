@@ -40,7 +40,7 @@ public class PasswordResetService {
     public void issueTokenAndSendEmail(String emailRaw) {
         String email = normalize(emailRaw);
 
-        String token = String.format("%06d", random.nextInt(1_000_000));
+        String token = "%06d".formatted(random.nextInt(1_000_000));
 
         PasswordResetToken prt = new PasswordResetToken();
         prt.setEmail(email);
