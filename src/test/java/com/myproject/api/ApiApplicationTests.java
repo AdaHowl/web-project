@@ -1,10 +1,9 @@
 package com.myproject.api;
 
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.autoconfigure.mail.MailSenderAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 
-@SpringBootTest(excludeAutoConfiguration = MailSenderAutoConfiguration.class)
+@SpringBootTest
 class ApiApplicationTests {
 
 	@Test
