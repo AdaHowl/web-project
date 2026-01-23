@@ -1,0 +1,125 @@
+/* Dán toàn bộ code này vào file login.css */
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background-color: #f8f9fa;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+
+    /* Ảnh nền của bạn */
+    background-image: url('https://suachualaptop24h.com/upload_images/images/2021/05/02/2561184c0d83292e2814a8db5dfe49e1.jpg'); 
+    background-size: cover;          
+    background-position: center;     
+    background-repeat: no-repeat;    
+    background-attachment: fixed;    
+}
+.container {
+    background-color: #ffffff;
+    padding: 2.5rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    width: 350px;
+    text-align: center;
+    z-index: 10;
+    position: relative;
+}
+h2 {
+    margin-top: 0;
+    margin-bottom: 2rem;
+    color: #333;
+}
+.input-group {
+    position: relative;
+    margin-bottom: 1.5rem;
+    text-align: left;
+}
+.input-group input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    box-sizing: border-box; 
+    font-size: 1rem;
+}
+.input-group label {
+    position: absolute;
+    left: 10px;
+    top: 10px;
+    color: #999;
+    background-color: white;
+    padding: 0 5px;
+    transition: all 0.2s ease;
+    pointer-events: none;
+}
+.input-group input:focus + label,
+.input-group input:not(:placeholder-shown) + label {
+    top: -10px;
+    left: 10px;
+    font-size: 0.8rem;
+    color: #555;
+}
+
+.btn {
+    background-color: #795548; 
+    color: white;
+    padding: 0.75rem;
+    border: none;
+    border-radius: 6px;
+    width: 100%;
+    cursor: pointer;
+    font-size: 1.0rem; 
+    font-weight: bold;
+    margin-top: 1rem;
+    transition: background-color 0.2s ease, opacity 0.2s ease;
+}
+.btn:hover {
+    background-color: #5d4037;
+}
+
+.btn:disabled {
+    background-color: #a1887f; 
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+.btn:disabled:hover {
+    background-color: #a1887f;
+}
+
+.message {
+    display: none; 
+    font-size: 0.875rem;      
+    padding: 0.75rem 1rem;   
+    border-radius: 6px;
+    margin-top: 1rem; 
+    margin-bottom: 1rem;     
+    font-weight: 500;
+    border: 1px solid;
+    text-align: left;        
+}
+#successMessage {
+    background-color: #e6fffa;
+    color: #00695c;
+    border-color: #b2dfdb;
+}
+#errorMessage {
+    background-color: #ffebee;
+    color: #c62828;
+    border-color: #ffcdd2;
+}
+
+.links {
+    display: flex;
+    justify-content: space-between; 
+    margin-top: 1.5rem;
+    font-size: 0.9rem;
+}
+.links a {
+    color: #795548; 
+    text-decoration: none;
+    font-weight: 600;
+}
+.links a:hover {
+    text-decoration: underline;
+}

@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign In</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f8f9fa;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+
+            background-image: url('https://suachualaptop24h.com/upload_images/images/2021/05/02/2561184c0d83292e2814a8db5dfe49e1.jpg');
+            background-size: cover; background-position: center; background-repeat: no-repeat; background-attachment: fixed;
+        }
+        .container {
+            background-color: rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.4);
+            padding: 2.5rem; border-radius: 20px; box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.15);
+            width: 300px; text-align: center; z-index: 10; position: relative; animation: fadeIn 0.8s ease-out;
+        }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-20px); } to { transform: translateY(0); } }
+        h2 { margin-top: 0; margin-bottom: 2rem; color: #ffffff; text-shadow: 1px 1px 5px rgba(0, 0, 0, 0.6); font-size: 2.2rem; letter-spacing: 1px; }
+        .input-group { position: relative; margin-bottom: 1.5rem; text-align: left; }
+        .input-group input {
+            width: 100%; padding: 10px; border: 1px solid rgba(255, 255, 255, 0.4);
+            background-color: #ffffff; border-radius: 6px; box-sizing: border-box; font-size: 1rem; color: #333333;
+            outline: none; transition: border-color 0.3s ease, box-shadow 0.3s ease;
+            -webkit-text-fill-color: #333333 !important;
+            -webkit-box-shadow: 0 0 0 1000px #ffffff inset !important;
+        }
+        .input-group input::placeholder { color: #e0e0e0; font-weight: 400; font-size: 0.9rem; opacity: 1; transition: color 0.3s ease; }
+        .input-group input:focus { border-color: #2E8CA2; box-shadow: 0 0 8px rgba(46, 140, 162, 0.5); }
+        .input-group input:focus::placeholder { color: transparent; }
+        .input-group label { display: none; }
+        .btn {
+            background-color: #2E8CA2; color: white; padding: 0.75rem;
+            border: none; border-radius: 6px; width: 100%;
+            cursor: pointer; font-size: 1.0rem; font-weight: bold;
+            margin-top: 1.5rem; transition: background-color 0.3s ease, opacity 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .btn:hover { background-color: #287a90; transform: translateY(-2px); box-shadow: 0 8px 15px rgba(46, 140, 162, 0.4); }
+        .btn:disabled { background-color: #7abccb; opacity: 0.8; cursor: not-allowed; transform: none; box-shadow: none; }
+        .message {
+            display: none; font-size: 0.875rem; padding: 0.75rem 1rem; border-radius: 6px;
+            margin-top: 1rem; margin-bottom: 1rem; font-weight: 500;
+            border: 1px solid; text-align: left; animation: slideIn 0.4s ease-out;
+        }
+        #successMessage { background-color: rgba(180, 235, 235, 0.8); color: #00695c; border-color: #b2dfdb; }
+        #errorMessage { background-color: rgba(255, 205, 210, 0.8); color: #c62828; border-color: #ffcdd2; }
+        .links { display: flex; justify-content: space-between; margin-top: 0.8rem; margin-bottom: 1.5rem; font-size: 0.8rem; }
+        .links a { color: #ffffff; text-decoration: none; font-weight: 500; text-shadow: 0 0 5px rgba(0, 0, 0, 0.6); transition: color 0.3s ease, text-shadow 0.3s ease; }
+        .links a:hover { text-decoration: underline; color: #d1c4e9; text-shadow: 0 0 8px rgba(0, 0, 0, 0.8); }
+        .social-login { margin-top: 1.5rem; border-top: 1px solid rgba(255, 255, 255, 0.5); padding-top: 1.5rem; display: flex; flex-direction: column; gap: 0.8rem; }
+        .social-btn { padding: 0.75rem; border-radius: 6px; font-size: 1rem; cursor: pointer; transition: background-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .facebook-btn { background-color: #3b5998; color: white; border: none; }
+        .google-btn { background-color: #ffffff; color: #757575; border: 1px solid #ddd; }
+        .qr-icon { position: absolute; top: 1rem; left: 1rem; font-size: 2rem; color: #ffffff; text-shadow: 0 0 5px rgba(0, 0, 0, 0.6); cursor: pointer; transition: color 0.3s ease, transform 0.3s ease; z-index: 20; }
+        .qr-modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.7); backdrop-filter: blur(5px); z-index: 1000; justify-content: center; align-items: center; animation: fadeInOverlay 0.3s ease-out; }
+
+        /* ✅ Reset token box (match your style) */
+        .token-box {
+            display: none;
+            margin-top: 1rem;
+            padding: 1rem;
+            border-radius: 12px;
+            background-color: rgba(255, 255, 255, 0.22);
+            border: 1px solid rgba(255, 255, 255, 0.35);
+            text-align: left;
+        }
+        .token-title {
+            color: #ffffff;
+            font-weight: 700;
+            margin-bottom: 0.6rem;
+            text-shadow: 0 0 5px rgba(0,0,0,0.6);
+            font-size: 0.95rem;
+        }
+        .token-btn {
+            background-color: #2E8CA2;
+            color: white;
+            padding: 0.65rem;
+            border: none;
+            border-radius: 6px;
+            width: 100%;
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-weight: bold;
+            transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .token-btn:hover {
+            background-color: #287a90;
+            transform: translateY(-1px);
+            box-shadow: 0 8px 15px rgba(46, 140, 162, 0.35);
+        }
+        .token-btn:disabled { background-color: #7abccb; opacity: 0.85; cursor: not-allowed; transform:none; box-shadow:none; }
+        .token-msg { display:none; font-size: 0.875rem; padding: 0.7rem 0.9rem; border-radius: 6px; margin-top: 0.8rem; border: 1px solid; }
+        .token-msg.ok { background-color: rgba(180, 235, 235, 0.8); color: #00695c; border-color: #b2dfdb; }
+        .token-msg.err { background-color: rgba(255, 205, 210, 0.8); color: #c62828; border-color: #ffcdd2; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="qr-icon" id="qrIcon">
+        <i class="fas fa-qrcode"></i>
+    </div>
+
+    <h2>Sign In</h2>
+
+    <form id="loginForm" autocomplete="off" novalidate>
+        <div class="input-group">
+            <input type="email" id="email" name="email" placeholder="Email/Phone/Username" required autocomplete="email">
+            <label for="email">Username (Email)</label>
+        </div>
+        <div class="input-group">
+            <input type="password" id="password" name="password" placeholder="Password" required autocomplete="current-password">
+            <label for="password">Password</label>
+        </div>
+
+        <p id="successMessage" class="message"></p>
+        <p id="errorMessage" class="message"></p>
+
+        <button type="submit" class="btn" id="submitButton" disabled>LOG IN</button>
+
+        <div class="links">
+            <a href="forgot-password.html">Forgot Password?</a>
+            <a href="signup.html">Sign up</a>
+        </div>
+
+        <!-- ✅ Token verify box -->
+        <div id="tokenBox" class="token-box">
+            <div class="token-title">Enter the reset token sent to your email</div>
+
+            <div class="input-group" style="margin-bottom: 0.8rem;">
+                <input type="email" id="resetEmail" placeholder="Email" autocomplete="email">
+            </div>
+            <div class="input-group" style="margin-bottom: 0.8rem;">
+                <input type="text" id="resetToken" placeholder="6-digit token" inputmode="numeric" maxlength="6" autocomplete="one-time-code">
+            </div>
+
+            <button type="button" id="verifyBtn" class="token-btn">VERIFY TOKEN</button>
+            <p id="tokenMsg" class="token-msg"></p>
+        </div>
+
+        <div class="social-login">
+            <button type="button" class="social-btn google-btn">
+                <i class="fab fa-google"></i> Log in with Google
+            </button>
+            <button type="button" class="social-btn facebook-btn">
+                <i class="fab fa-facebook-f"></i> Log in with Facebook
+            </button>
+        </div>
+    </form>
+</div>
+
+<div class="qr-modal-overlay" id="qrModalOverlay">
+    <div class="qr-modal-content">
+        <span class="qr-modal-close" id="qrModalClose">&times;</span>
+        <h3>Scan QR to Log In</h3>
+        <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://example.com/qr-login" alt="QR Code">
+        <p style="color: #555; font-size: 0.9rem;">Open your app and scan this QR code.</p>
+    </div>
+</div>
+
+<script>
+    const API_BASE = 'http://localhost:8083';
+    const LOGIN_API_URL = `${API_BASE}/api/auth/login`;
+    // ✅ Endpoint verify code thật của backend
+    const VERIFY_TOKEN_URL = `${API_BASE}/api/auth/verify-reset-code`;
+    const AUTH_TOKEN_KEY = 'authToken';
+
+    function displayMessage(element, text, isError) {
+        element.textContent = text;
+        element.style.display = 'block';
+        if (isError) {
+            document.getElementById('successMessage').style.display = 'none';
+        } else {
+            document.getElementById('errorMessage').style.display = 'none';
+        }
+    }
+
+    function qs(name) { return new URLSearchParams(window.location.search).get(name); }
+
+    function showTokenMsg(text, ok) {
+        const tokenMsg = document.getElementById('tokenMsg');
+        tokenMsg.classList.remove('ok', 'err');
+        tokenMsg.classList.add(ok ? 'ok' : 'err');
+        tokenMsg.textContent = text;
+        tokenMsg.style.display = 'block';
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const loginForm = document.getElementById('loginForm');
+        const emailInput = document.getElementById('email');
+        const passwordInput = document.getElementById('password');
+        const submitButton = document.getElementById('submitButton');
+        const errorMessage = document.getElementById('errorMessage');
+        const successMessage = document.getElementById('successMessage');
+
+        // QR modal logic
+        const qrIcon = document.getElementById('qrIcon');
+        const qrModalOverlay = document.getElementById('qrModalOverlay');
+        const qrModalClose = document.getElementById('qrModalClose');
+        if(qrIcon) qrIcon.addEventListener('click', function() { qrModalOverlay.style.display = 'flex'; });
+        if(qrModalClose) qrModalClose.addEventListener('click', function() { qrModalOverlay.style.display = 'none'; });
+        if(qrModalOverlay) qrModalOverlay.addEventListener('click', function(event) { if (event.target === qrModalOverlay) { qrModalOverlay.style.display = 'none'; } });
+
+        function validateForm() {
+            const isEmailFilled = emailInput.value.trim() !== '';
+            const isPasswordFilled = passwordInput.value.trim() !== '';
+            submitButton.disabled = !(isEmailFilled && isPasswordFilled);
+        }
+        validateForm();
+        emailInput.addEventListener('input', validateForm);
+        passwordInput.addEventListener('input', validateForm);
+
+        // ✅ Show token box if redirected from forgot-password.html
+        const tokenBox = document.getElementById('tokenBox');
+        const resetEmail = document.getElementById('resetEmail');
+        const resetToken = document.getElementById('resetToken');
+        const verifyBtn = document.getElementById('verifyBtn');
+
+        if (qs('reset') === '1') {
+            tokenBox.style.display = 'block';
+            const emailFromQS = qs('email');
+            if (emailFromQS) resetEmail.value = emailFromQS;
+            resetToken.focus();
+        }
+
+        verifyBtn.addEventListener('click', async () => {
+            const email = (resetEmail.value || '').trim();
+            const token = (resetToken.value || '').trim();
+
+            if (!email || !token) {
+                showTokenMsg('Email and token are required.', false);
+                return;
+            }
+
+            verifyBtn.disabled = true;
+            verifyBtn.textContent = 'VERIFYING...';
+
+            try {
+                const res = await fetch(VERIFY_TOKEN_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, token })
+                });
+
+                const data = await res.json().catch(() => ({}));
+
+                if (res.ok && data.resetKey) {
+                    sessionStorage.setItem('resetEmail', email);
+                    sessionStorage.setItem('resetKey', data.resetKey);
+
+                    showTokenMsg('Token verified! Redirecting...', true);
+
+                    setTimeout(() => {
+                        window.location.href = 'reset-password.html';
+                    }, 900);
+                } else {
+                    showTokenMsg(data.message || 'Invalid token or token expired.', false);
+                }
+            } catch (e) {
+                console.error(e);
+                showTokenMsg('Cannot connect to Server (Port 8083). Check your network.', false);
+            } finally {
+                verifyBtn.disabled = false;
+                verifyBtn.textContent = 'VERIFY TOKEN';
+            }
+        });
+
+        // LOGIN submit
+        loginForm.addEventListener('submit', async function(event) {
+            event.preventDefault();
+            displayMessage(errorMessage, '', true);
+            displayMessage(successMessage, 'Processing login...', false);
+
+            const email = emailInput.value.trim();
+            const password = passwordInput.value.trim();
+
+            submitButton.disabled = true;
+
+            const loginData = { email, password };
+
+            try {
+                const response = await fetch(LOGIN_API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(loginData)
+                });
+
+                const data = await response.json().catch(() => ({}));
+
+                if (response.ok) {
+                    displayMessage(successMessage, 'Login successful! Redirecting to home page...', false);
+
+                    localStorage.setItem(AUTH_TOKEN_KEY, data.token || ('valid_token_for_' + email));
+
+                    document.body.style.animation = 'fadeOut 0.5s ease-out forwards';
+                    setTimeout(function() {
+                        window.location.href = 'index.html';
+                    }, 1000);
+
+                } else if (response.status === 401) {
+                    displayMessage(errorMessage, data.message || 'Invalid email or password. Please try again.', true);
+                } else {
+                    displayMessage(errorMessage, data.message || 'Login failed. Server error.', true);
+                }
+            } catch (error) {
+                console.error('Network Error:', error);
+                displayMessage(errorMessage, 'Cannot connect to Server (Port 8083). Check if the Java Server is running.', true);
+            } finally {
+                submitButton.disabled = false;
+            }
+        });
+    });
+
+    document.write('<style>@keyframes fadeOut { from {opacity: 1;} to {opacity: 0;} }</style>');
+</script>
+</body>
+</html>
