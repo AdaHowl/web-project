@@ -7,8 +7,6 @@ import com.myproject.api.repositories.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import java.util.Optional;
-import lombok.Data; // THÊM DÒNG NÀY (RẤT QUAN TRỌNG)
-import lombok.Getter; // Thêm nếu cần
 
 // ... (các imports khác) ...
 

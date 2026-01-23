@@ -12,11 +12,13 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.cors.CorsConfiguration;
 
 import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/auth")
+@CrossOrigin(origins = "*", maxAge = 3600)
 public class AuthController {
 
     private final UserRepository userRepository;
@@ -91,8 +93,9 @@ public class AuthController {
 
     /**
      * Forgot password:
-     * - Nếu email tồn tại -> tạo token + gửi email thật
-     * - Luôn trả 200 OK để tránh lộ email có tồn tại hay không
+     * - Check email tồn tại trong database
+     * - Nếu tồn tại -> tạo token + gửi email
+     * - Nếu không -> return error
      */
     @PostMapping("/forgot-password")
     public ResponseEntity<?> forgotPassword(@RequestBody ForgotPasswordDto request) {
@@ -104,12 +107,15 @@ public class AuthController {
         String email = normalizeEmail(emailRaw);
 
         Optional<User> userOpt = userRepository.findByEmail(email);
-        if (userOpt.isPresent()) {
-            passwordResetService.issueTokenAndSendEmail(email);
+        if (userOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new MessageResponse("Email not found. Please check your email or register."));
         }
 
+        passwordResetService.issueTokenAndSendEmail(email);
+
         return ResponseEntity.ok(new MessageResponse(
-                "If the email exists, a reset code has been sent to the email."
+                "A reset code has been sent to your email."
         ));
     }
 
@@ -126,14 +132,19 @@ public class AuthController {
         String email = normalizeEmail(request.getEmail());
         String token = request.getToken().trim();
 
+        System.out.println("[DEBUG] Verify request: email=" + email + ", token=" + token);
+
         // bảo mật: vẫn nên check user tồn tại
         if (userRepository.findByEmail(email).isEmpty()) {
+            System.out.println("[DEBUG] User not found!");
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(new MessageResponse("Invalid reset request."));
         }
 
         String resetKey = passwordResetService.verifyCodeAndIssueResetKey(email, token);
+        System.out.println("[DEBUG] Reset key result: " + resetKey);
         if (resetKey == null) {
+            System.out.println("[DEBUG] Reset key is null!");
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(new MessageResponse("Invalid token or token expired."));
         }
@@ -185,6 +196,12 @@ public class AuthController {
 
     private String normalizeEmail(String email) {
         return email.trim().toLowerCase();
+    }
+
+    @GetMapping("/debug/clear-tokens")
+    public ResponseEntity<?> clearTokens() {
+        passwordResetService.clearAllTokens();
+        return ResponseEntity.ok(new MessageResponse("All password reset tokens cleared."));
     }
 
     // ========= RESPONSES =========

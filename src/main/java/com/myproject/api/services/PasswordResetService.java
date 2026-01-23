@@ -13,6 +13,7 @@ import java.security.SecureRandom;
 import java.time.Instant;
 import java.util.HexFormat;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 @Service
 public class PasswordResetService {
@@ -20,17 +21,15 @@ public class PasswordResetService {
     private final JavaMailSender mailSender;
     private final PasswordResetTokenRepository tokenRepo;
     private final SecureRandom random = new SecureRandom();
+    private static final Logger logger = Logger.getLogger(PasswordResetService.class.getName());
 
     // 10 phút
-    private static final long TOKEN_TTL_SECONDS = 10 * 60;
-    private static final long RESET_KEY_TTL_SECONDS = 10 * 60;
+    private static final long TOKEN_TTL_SECONDS = 60 * 60; // 1 hour for testing
+    private static final long RESET_KEY_TTL_SECONDS = 60 * 60;
+    private static final String PEPPER = "your-secret-pepper-key-12345";
 
     @Value("${app.mail.from:no-reply@myproject.local}")
     private String fromEmail;
-
-    // “pepper” để hash mạnh hơn (đặt trong application.properties)
-    @Value("${app.reset.pepper:CHANGE_ME_PEPPER}")
-    private String pepper;
 
     public PasswordResetService(JavaMailSender mailSender, PasswordResetTokenRepository tokenRepo) {
         this.mailSender = mailSender;
@@ -40,11 +39,13 @@ public class PasswordResetService {
     public void issueTokenAndSendEmail(String emailRaw) {
         String email = normalize(emailRaw);
 
+        logger.info("Issuing password reset token for email: " + email);
+
         String token = "%06d".formatted(random.nextInt(1_000_000));
 
         PasswordResetToken prt = new PasswordResetToken();
         prt.setEmail(email);
-        prt.setTokenHash(sha256(email + ":" + token + ":" + pepper));
+        prt.setTokenHash(sha256(email + ":" + token + ":" + PEPPER));
         prt.setCreatedAt(Instant.now());
         prt.setExpiresAt(Instant.now().plusSeconds(TOKEN_TTL_SECONDS));
         prt.setAttempts(0);
@@ -52,6 +53,8 @@ public class PasswordResetService {
         prt.setResetKeyExpiresAt(null);
 
         tokenRepo.save(prt);
+
+        logger.info("Token saved, sending email to: " + email + " with token: " + token);
 
         SimpleMailMessage msg = new SimpleMailMessage();
         msg.setFrom(fromEmail);
@@ -61,7 +64,13 @@ public class PasswordResetService {
                 "Your password reset code is: " + token + "\n\n" +
                 "This code will expire in 10 minutes."
         );
-        mailSender.send(msg);
+        try {
+            mailSender.send(msg);
+            logger.info("Email sent successfully to: " + email);
+        } catch (Exception e) {
+            logger.severe("Failed to send email to: " + email + " Error: " + e.getMessage());
+            throw e;
+        }
     }
 
     /**
@@ -71,18 +80,34 @@ public class PasswordResetService {
         String email = normalize(emailRaw);
         String token = tokenRaw == null ? "" : tokenRaw.trim();
 
+        logger.info("=== VERIFY CODE === Email: " + email + ", Token: " + token);
+
         var opt = tokenRepo.findTopByEmailOrderByCreatedAtDesc(email);
-        if (opt.isEmpty()) return null;
+        if (opt.isEmpty()) {
+            logger.warning("Token not found for email: " + email);
+            return null;
+        }
 
         PasswordResetToken prt = opt.get();
 
-        if (Instant.now().isAfter(prt.getExpiresAt())) return null;
+        logger.info("Found token, expiresAt: " + prt.getExpiresAt() + ", now: " + Instant.now());
+        
+        if (Instant.now().isAfter(prt.getExpiresAt())) {
+            logger.warning("Token expired!");
+            return null;
+        }
 
-        // optional: limit attempts
-        if (prt.getAttempts() >= 10) return null;
+        if (prt.getAttempts() >= 10) {
+            logger.warning("Too many attempts!");
+            return null;
+        }
 
-        String hash = sha256(email + ":" + token + ":" + pepper);
+        String hash = sha256(email + ":" + token + ":" + PEPPER);
+        logger.info("Calculated hash: " + hash);
+        logger.info("Stored hash: " + prt.getTokenHash());
+        
         if (!hash.equals(prt.getTokenHash())) {
+            logger.warning("Hash mismatch!");
             prt.setAttempts(prt.getAttempts() + 1);
             tokenRepo.save(prt);
             return null;
@@ -93,6 +118,7 @@ public class PasswordResetService {
         prt.setResetKeyExpiresAt(Instant.now().plusSeconds(RESET_KEY_TTL_SECONDS));
         tokenRepo.save(prt);
 
+        logger.info("Code verified successfully, resetKey issued: " + resetKey);
         return resetKey;
     }
 
@@ -112,6 +138,10 @@ public class PasswordResetService {
 
     public void consumeAll(String emailRaw) {
         tokenRepo.deleteByEmail(normalize(emailRaw));
+    }
+
+    public void clearAllTokens() {
+        tokenRepo.deleteAll();
     }
 
     private String normalize(String email) {
